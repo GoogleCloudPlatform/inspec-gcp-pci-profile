@@ -1,0 +1,175 @@
+# encoding: utf-8
+# Copyright 2019 The inspec-gcp-pci-profile Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: inspec-gcp-pci-3.2.1
+title: "Inspec GCP PCI-DSS v3.2.1"
+maintainer: 
+copyright: Google
+copyright_email: copyright@google.com
+license: Apache-2.0
+summary: "Inspec Google Cloud Platform PCI-DSS v3.2.1 Profile"
+version: "0.1.0"
+attributes:
+- name: gcp_project_id
+  description: 'The GCP project identifier.'
+  type: string
+  required: true
+- name: pci_version
+  description: 'The short version of the PCI DSS Standard'
+  value: '3.2.1'
+  type: string
+- name: pci_url
+  description: 'The URL to the PCI-DSS 3.2.1 PDF'
+  value: 'https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-2-1.pdf'
+  type: string
+- name: bucket_logging_ignore_regex
+  description: 'Ignore this bucket by regex from requiring logging to be enabled'
+  # example = "-logging"
+  value: "replace-with-bucket-name-or-partial-match"
+  type: string
+- name: fw_change_control_id_regex
+  description: 'Firewall rule descriptions must match this string'
+  # example = "CID:"
+  value: "replace-with-change-control-id-regex"
+  type: string
+- name: fw_override_control_id_regex
+  description: 'Firewall rule descriptions must match this string'
+  # example = "CID:"
+  value: "replace-with-change-control-id-regex"
+  type: string
+- name: cai_inventory_bucket_name
+  description: 'The GCS bucket name where the CAI inventory is sent'
+  value: "inventory-bucket-name"
+  type: string
+- name: cai_inventory_file_path
+  description: 'The path inside the GCS bucket where the latest CAI inventory file is stored.'
+  value: "path/to/inventory.json"
+  type: string
+- name: cai_inventory_age_seconds
+  description: 'The allowed age in seconds of the inventory file'
+  value: 86400
+  type: numeric
+- name: gcs_pii_buckets
+  description: 'The list of buckets that contain PII, PHI, etc'
+  type: array
+  value:
+    - "my-bucket-name"
+    - "my-other-bucket"
+- name: gcs_logging_buckets
+  description: 'The list of buckets that contain log exports'
+  type: array
+  value:
+    - "my-bucket-name"
+- name: logging_viewer_list
+  description: 'The allowed list of Logging Viewer'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+- name: logging_admin_list
+  description: 'The allowed list of Logging Admins'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+- name: project_owners_list
+  description: 'The allowed list of Owners'
+  type: array
+  value:
+    - "user:testuser@domain.com"
+- name: cloudsql_admins_list
+  description: 'The allowed list of CloudSQL Admins'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: cloudsql_clients_list
+  description: 'The allowed list of CloudSQL Users'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: memorystore_admins_list
+  description: 'The allowed list of Memorystore Admins'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: bq_admins_list
+  description: 'The allowed list of BigQuery Admins'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: spanner_admins_list
+  description: 'The allowed list of Cloud Spanner Admins'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: kms_admins_list
+  description: 'The allowed list of KMS Admins'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: kms_encrypters_list
+  description: 'The allowed list of KMS Encrypters'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: kms_decrypters_list
+  description: 'The allowed list of KMS Decrypters'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: kms_encrypterdecrypters_list
+  description: 'The allowed list of KMS EncrypterDecrypters'
+  type: array
+  value:
+    - "serviceAccount:test1@myproject.iam.gserviceaccount.com"
+    - "serviceAccount:test2@myproject.iam.gserviceaccount.com"
+- name: kms_regions_list
+  description: 'The allowed list of regions for KMS keys'
+  type: array
+  value:
+    - "us-central1"
+- name: sa_key_older_than_seconds
+  description: 'How many seconds SA keys should not be older than'
+  value: 7776000
+  type: numeric
+- name: kms_rotation_period_seconds
+  description: 'How many seconds KMS Keys should be last rotated (1 year)'
+  value: 31536000
+  type: numeric
+- name: environment_label
+  description: 'The label key designating the GCE/GKE instance environment'
+  value: "env"
+  type: string
+- name: allow_all_tcp_ports
+  description: 'The allowed list of tcp ports egress to 0.0.0.0/0'
+  type: array
+  value:
+    - "80"
+    - "443"
+- name: allow_all_udp_ports
+  description: 'The allowed list of udp ports egress to 0.0.0.0/0'
+  type: array
+  value:
+    - "53"
+depends:
+- name: inspec-gcp
+  git: https://github.com/inspec/inspec-gcp.git
+  tag: v0.12.4
