@@ -2,6 +2,10 @@
 
 This repository holds the [Google Cloud Platform (GCP)](https://cloud.google.com/) [PCI DSS v3.2.1](https://www.pcisecuritystandards.org/pci_security/) [Inspec](https://www.inspec.io/) Profile.
 
+## Required Disclaimer
+
+This is not an officially supported Google product. This code is intended to help users assess their security posture on the Google Cloud against the PCI-DSS requirements. This code is not certified by PCI-DSS.
+
 ## Coverage
 
 TBD
