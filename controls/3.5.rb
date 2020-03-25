@@ -166,7 +166,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   describe "[#{gcp_project_id}] KMS Regions" do
     subject { keyring_locations }
-    it { should cmp kms_regions_list.sort }
+    it { should be_in kms_regions_list.sort }
   end
 
 end
