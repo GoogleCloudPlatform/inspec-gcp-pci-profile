@@ -164,7 +164,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   end
   keyring_locations.uniq!.sort!
 
-  describe "[#{gcp_project_id}] KMS Regions" do
+  describe "[#{gcp_project_id}] KMS Regions #{ keyring_locations.sort }" do
     subject { keyring_locations }
     it { should be_in kms_regions_list.sort }
   end
