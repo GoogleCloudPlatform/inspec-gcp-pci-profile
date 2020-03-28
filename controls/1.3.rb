@@ -144,7 +144,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # GCE Instances should not have public IPs
   gce_instances.each do |instance|
     next if instance[:name] =~ /^gke-/
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       it "should not have a public IP assigned" do
         expect(!subject.network_interfaces[0].respond_to?('access_configs') || subject.first_network_interface_type != "one_to_one_nat").to eq(true)
