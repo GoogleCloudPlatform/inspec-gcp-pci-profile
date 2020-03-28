@@ -186,5 +186,3 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   end
 
 end
-
-end
