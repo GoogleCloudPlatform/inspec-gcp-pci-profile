@@ -14,11 +14,12 @@
 # limitations under the License.
 
 gcp_project_id = attribute('gcp_project_id')
+gcp_gke_locations = attribute('gcp_gke_locations')
 pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '6.2'
 
-gke_clusters = get_gke_clusters(gcp_project_id)
+gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Ensure that all system components and software are protected from known vulnerabilities by installing applicable vendor supplied security patches. Install critical security patches within one month of release."
 

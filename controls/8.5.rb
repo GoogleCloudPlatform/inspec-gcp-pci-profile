@@ -14,9 +14,12 @@
 # limitations under the License.
 
 gcp_project_id = attribute('gcp_project_id')
+gce_zones = attribute('gce_zones')
 pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '8.5'
+
+gce_instances = get_gce_instances(gcp_project_id, gce_zones)
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Do not use group, shared, or generic IDs, passwords, or other authentication methods"
 
@@ -41,13 +44,11 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Ensure the default compute service account is not attached to GCE/GKE instances
-  google_compute_zones(project: gcp_project_id).zone_names.each do |zone|
-    google_compute_instances(project: gcp_project_id, zone: zone).instance_names.each do |instance|
-      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] #{zone}/#{instance}'s"  do
-        subject { google_compute_instance(project: gcp_project_id, zone: zone, name: instance) }
-        it "service account should not be the Default Compute Service Account" do
-          subject.service_accounts[0].email.should_not match /-compute@developer.gserviceaccount.com$/
-        end
+  gce_instances.each do |instance|
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+      subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
+      it "service account should not be the Default Compute Service Account" do
+        expect(subject.service_accounts[0].email).not_to match /-compute@developer.gserviceaccount.com$/
       end
     end
   end

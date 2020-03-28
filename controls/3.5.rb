@@ -53,6 +53,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   keyrings = false 
   locations.each do |location|
+    sleep 6
     if google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.count > 0
       keyrings = true
       break
@@ -162,7 +163,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       keyring_locations << location
     end
   end
-  keyring_locations.uniq!.sort!
+  keyring_locations.sort!.uniq! unless keyring_locations.empty?
 
   describe "[#{gcp_project_id}] KMS Regions #{ keyring_locations }" do
     subject { keyring_locations }

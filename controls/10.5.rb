@@ -14,11 +14,12 @@
 # limitations under the License.
 
 gcp_project_id = attribute('gcp_project_id')
+gcp_gke_locations = attribute('gcp_gke_locations')
 pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '10.5'
 
-gke_clusters = get_gke_clusters(gcp_project_id)
+gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
 gcs_logging_buckets = attribute('gcs_logging_buckets')
 logging_viewer_list = attribute('logging_viewer_list')
 logging_admin_list = attribute('logging_admin_list')
@@ -143,6 +144,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Ensure each logging bucket has versioning policy set
   gcs_logging_buckets.each do |bucket|
+    next if bucket.empty?
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Logging bucket: #{bucket}" do
       subject { google_storage_bucket(name: bucket) }
       it { should exist }
