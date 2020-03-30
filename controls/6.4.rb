@@ -14,12 +14,15 @@
 # limitations under the License.
 
 gcp_project_id = attribute('gcp_project_id')
+gcp_gke_locations = attribute('gcp_gke_locations')
+gce_zones = attribute('gce_zones')
 pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '6.4'
 
 environment_label = attribute('environment_label')
-gke_clusters = get_gke_clusters(gcp_project_id)
+gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
+gce_instances = get_gce_instances(gcp_project_id, gce_zones)
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Follow change control processes and procedures for all changes to system components"
 
@@ -44,13 +47,11 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # GCE/GKE Instances have a label indicating the environment
-  google_compute_zones(project: gcp_project_id).zone_names.each do |zone|
-    google_compute_instances(project: gcp_project_id, zone: zone).instance_names.each do |instance|
-      describe "[#{gcp_project_id}] #{zone}/#{instance}" do
-        subject { google_compute_instance(project: gcp_project_id, zone: zone, name: instance) }
-        it "should have an instance label key of #{environment_label}" do
-          expect(subject.labels_keys).to include(/#{environment_label}/)
-        end
+  gce_instances.each do |instance|
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+      subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
+      it "should have an instance label key of #{environment_label}" do
+        expect(subject.labels_keys).to include(/#{environment_label}/)
       end
     end
   end

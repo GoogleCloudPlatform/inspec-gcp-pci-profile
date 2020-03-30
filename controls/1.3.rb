@@ -14,11 +14,14 @@
 # limitations under the License.
 
 gcp_project_id = attribute('gcp_project_id')
+gcp_gke_locations = attribute('gcp_gke_locations')
+gce_zones = attribute('gce_zones')
 pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '1.3'
 
-#gke_clusters = get_gke_clusters(gcp_project_id)
+gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
+gce_instances = get_gce_instances(gcp_project_id, gce_zones)
 fw_change_control_id_regex = attribute('fw_change_control_id_regex')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Prohibit direct public access between the Internet and any system component in the cardholder data environment."
@@ -138,49 +141,48 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
-  ## GCE Instances should not have public IPs
-  #google_compute_zones(project: gcp_project_id).zone_names.each do |zone|
-  #  google_compute_instances(project: gcp_project_id, zone: zone).where{ instance_name !~ /^gke-/ }.instance_names.each do |instance|
-  #    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] #{zone}/#{instance}" do
-  #      subject { google_compute_instance(project: gcp_project_id, zone: zone, name: instance) }
-  #      it "should not have a public IP assigned" do
-  #        expect(!subject.network_interfaces[0].respond_to?('access_configs') || subject.first_network_interface_type != "one_to_one_nat").to eq(true)
-  #      end
-  #    end
-  #  end
-  #end
+  # GCE Instances should not have public IPs
+  gce_instances.each do |instance|
+    next if instance[:name] =~ /^gke-/
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
+      subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
+      it "should not have a public IP assigned" do
+        expect(!subject.network_interfaces[0].respond_to?('access_configs') || subject.first_network_interface_type != "one_to_one_nat").to eq(true)
+      end
+    end
+  end
 
-  ## GCS Buckets should not have allUsers or allAuthenticatedUsers (All) set on any bucket role
-  #google_storage_buckets(project: gcp_project_id).bucket_names.each do |bucket|
-  #  google_storage_bucket_iam_bindings(bucket: bucket).iam_binding_roles.each do |role|
-  #    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] GCS Bucket #{bucket}, Role: #{role}" do
-  #      subject { google_storage_bucket_iam_binding(bucket: bucket, role: role) }
-  #      its('members') { should_not include 'allUsers' }
-  #      its('members') { should_not include 'allAuthenticatedUsers' }
-  #    end
-  #  end
-  #end
+  # GCS Buckets should not have allUsers or allAuthenticatedUsers (All) set on any bucket role
+  google_storage_buckets(project: gcp_project_id).bucket_names.each do |bucket|
+    google_storage_bucket_iam_bindings(bucket: bucket).iam_binding_roles.each do |role|
+      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] GCS Bucket #{bucket}, Role: #{role}" do
+        subject { google_storage_bucket_iam_binding(bucket: bucket, role: role) }
+        its('members') { should_not include 'allUsers' }
+        its('members') { should_not include 'allAuthenticatedUsers' }
+      end
+    end
+  end
 
-  ## GKE Clusters have private API and nodes
-  #gke_clusters.each do |gke_cluster|
-  #  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-  #    subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
-  #    its('private_cluster_config.enable_private_endpoint') { should cmp true }
-  #    its('private_cluster_config.enable_private_nodes') { should cmp true }
-  #  end
-  #end
+  # GKE Clusters have private API and nodes
+  gke_clusters.each do |gke_cluster|
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
+      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      its('private_cluster_config.enable_private_endpoint') { should cmp true }
+      its('private_cluster_config.enable_private_nodes') { should cmp true }
+    end
+  end
 
-  ## CloudSQL instances require SSL, are not allowed from 0.0.0.0/0, and use a private IP endpoint
-  #google_sql_database_instances(project: gcp_project_id).instance_names.each do |db|
-  #  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] CloudSQL #{db}" do
-  #    subject { google_sql_database_instance(project: gcp_project_id, database: db) }
-  #    it { should have_ip_configuration_require_ssl }
-  #    its('authorized_networks') { should_not include '0.0.0.0/0' }
-  #    it "should use a private IP address only" do
-  #      expect(subject.settings.ip_configuration.respond_to?('private_network') && !subject.settings.ip_configuration.private_network.nil?).to eq(true)
-  #      subject.settings.ip_configuration.ipv4_enabled.should cmp(false)
-  #    end
-  #  end
-  #end
+  # CloudSQL instances require SSL, are not allowed from 0.0.0.0/0, and use a private IP endpoint
+  google_sql_database_instances(project: gcp_project_id).instance_names.each do |db|
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] CloudSQL #{db}" do
+      subject { google_sql_database_instance(project: gcp_project_id, database: db) }
+      it { should have_ip_configuration_require_ssl }
+      its('authorized_networks') { should_not include '0.0.0.0/0' }
+      it "should use a private IP address only" do
+        expect(subject.settings.ip_configuration.respond_to?('private_network') && !subject.settings.ip_configuration.private_network.nil?).to eq(true)
+        expect(subject.settings.ip_configuration.ipv4_enabled).to cmp(false)
+      end
+    end
+  end
 
 end

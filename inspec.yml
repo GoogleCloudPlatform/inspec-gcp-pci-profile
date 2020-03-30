@@ -170,7 +170,17 @@ attributes:
   type: array
   value:
     - "53"
+- name: gcp_gke_locations
+  description: 'The list of regions and/or zone names where GKE clusters are running. An empty array searches all locations'
+  type: array
+  value:
+    - ""
+- name: gce_zones
+  description: 'The list of zone names where GCE instances are running. An empty array searches all locations'
+  type: array
+  value:
+    - ""
 depends:
 - name: inspec-gcp
   git: https://github.com/inspec/inspec-gcp.git
-  tag: v0.12.4
+  tag: v0.21.4
