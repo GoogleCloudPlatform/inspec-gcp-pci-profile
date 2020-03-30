@@ -183,4 +183,4 @@ attributes:
 depends:
 - name: inspec-gcp
   git: https://github.com/inspec/inspec-gcp.git
-  tag: v0.12.4
+  tag: v0.21.4
