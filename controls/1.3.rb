@@ -56,23 +56,27 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       ingress_from_all_fw_rules << firewall_name
     end
   end
-
-  ingress_from_all_fw_rules.each do |fw_rule|
-    fw = google_compute_firewall(project: gcp_project_id, name: fw_rule)
-    if !fw.respond_to?('target_tags') && !fw.respond_to?('target_service_accounts')
-      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ingress firewall rule #{fw_rule} that does not target tags or service accounts" do
-        subject { fw }
-        it { should_not exist }
-      end
+  if (ingress_from_all_fw_rules == [])
+    describe "There are no applicable firewall rules" do
+      skip 'There are no applicable firewall rules in this project'
     end
-    if fw.allow_port_protocol?("0","all")
-      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ingress firewall rule #{fw_rule} that allows all ports/protocols" do
-        subject { fw }
-        it { should_not exist }
+  else
+    ingress_from_all_fw_rules.each do |fw_rule|
+      fw = google_compute_firewall(project: gcp_project_id, name: fw_rule)
+      if !fw.respond_to?('target_tags') && !fw.respond_to?('target_service_accounts')
+        describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ingress firewall rule #{fw_rule} that does not target tags or service accounts" do
+          subject { fw }
+          it { should_not exist }
+        end
+      end
+      if fw.allow_port_protocol?("0","all")
+        describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ingress firewall rule #{fw_rule} that allows all ports/protocols" do
+          subject { fw }
+          it { should_not exist }
+        end
       end
     end
   end
-
 end
 
 # 1.3.4
@@ -184,5 +188,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       end
     end
   end
-
 end

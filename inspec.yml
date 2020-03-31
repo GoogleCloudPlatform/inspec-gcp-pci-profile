@@ -20,7 +20,7 @@ copyright: Google
 copyright_email: copyright@google.com
 license: Apache-2.0
 summary: "Inspec Google Cloud Platform PCI-DSS v3.2.1 Profile"
-version: "0.2.0"
+version: "0.2.1"
 attributes:
 - name: gcp_project_id
   description: 'The GCP project identifier.'
