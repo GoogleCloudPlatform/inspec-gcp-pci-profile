@@ -118,7 +118,9 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure all KMS Keys in each Keyring are HSM-backed.
   locations.each do |location|
     google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do |keyring|
+      sleep 3
       google_kms_crypto_keys(project: gcp_project_id, location: location, key_ring_name: keyring).crypto_key_names.each do |keyname|
+        sleep 3
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
         if key.primary_state == "ENABLED"
           describe "[#{gcp_project_id}] #{key.name.sub('projects/', '').sub('locations/','').sub('keyRings/','').sub('cryptoKeys/','')}" do
@@ -160,6 +162,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   keyring_locations = []
   locations.each do |location|
     google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do |keyring|
+      sleep 3
       keyring_locations << location
     end
   end
