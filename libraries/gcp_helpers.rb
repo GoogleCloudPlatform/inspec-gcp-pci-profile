@@ -33,12 +33,13 @@ module GcpHelpers
             @gke_locations = gcp_gke_locations
           end
 
-          # Loop/fetch/cache the names and locations of GKE clusters
+          # Loop/fetch/cache the names and locations of non-regional GKE clusters
           @gke_locations.each do |gke_location|
-            google_container_regional_clusters(project: gcp_project_id, location: gke_location).names.each do |gke_cluster|
+            google_container_clusters(project: gcp_project_id, location: gke_location).cluster_names.each do |gke_cluster|
               @cached_gke_clusters.push({:cluster_name => gke_cluster, :location => gke_location})
             end
           end
+
           # Mark the cache as full
           @gke_clusters_cached = true
         rescue NoMethodError
