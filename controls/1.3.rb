@@ -170,7 +170,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # GKE Clusters have private API and nodes
   gke_clusters.each do |gke_cluster|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       its('private_cluster_config.enable_private_endpoint') { should cmp true }
       its('private_cluster_config.enable_private_nodes') { should cmp true }
     end
