@@ -45,14 +45,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
    # Subnets should have VPC flow logs enabled
    google_compute_regions(project: gcp_project_id).region_names.each do |region|
-     #google_compute_subnetworks(project: gcp_project_id, region: region).where(enableFlowLogs: false).subnetwork_names.each do |subnet|
      google_compute_subnetworks(project: gcp_project_id, region: region).subnetwork_names.each do |subnet|
-       #google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) do subnet
        describe "[#{gcp_project_id}] #{region}/#{subnet}" do
-       #describe google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) do
          subject { google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) }
          its('log_config.enable') { should be true }
-         #it { should eq nil }
        end
      end
    end
@@ -62,7 +58,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     next if bucket =~ /#{bucket_logging_ignore_regex}/
     describe "[#{gcp_project_id}] GCS Bucket #{bucket}" do
       subject { google_storage_bucket(name: bucket).logging }
-      #it { should have_logging_enabled }
       its('log_bucket') { should_not eq nil }
     end
   end
