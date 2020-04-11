@@ -43,15 +43,15 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
-   # Subnets should have VPC flow logs enabled
-   google_compute_regions(project: gcp_project_id).region_names.each do |region|
-     google_compute_subnetworks(project: gcp_project_id, region: region).subnetwork_names.each do |subnet|
-       describe "[#{gcp_project_id}] #{region}/#{subnet}" do
-         subject { google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) }
-         its('log_config.enable') { should be true }
-       end
-     end
-   end
+  # Subnets should have VPC flow logs enabled
+  google_compute_regions(project: gcp_project_id).region_names.each do |region|
+    google_compute_subnetworks(project: gcp_project_id, region: region).subnetwork_names.each do |subnet|
+      describe "[#{gcp_project_id}] #{region}/#{subnet}" do
+        subject { google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) }
+        its('log_config.enable') { should be true }
+      end
+    end
+  end
 
   # GCS Buckets should have logging enabled
   google_storage_buckets(project: gcp_project_id).bucket_names.each do |bucket|
