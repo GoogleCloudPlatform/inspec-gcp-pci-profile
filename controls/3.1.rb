@@ -51,8 +51,8 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{gcp_project_id}] Sensitive data bucket: #{bucket}" do
       subject { google_storage_bucket(name: bucket) }
       it { should exist }
-      it { should have_logging_enabled }
-      it { should have_versioning_enabled }
+      its('versioning.enabled') { should eq true }
+      its('logging.log_bucket') { should_not eq nil }
     end
   end
 
