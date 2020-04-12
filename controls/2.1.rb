@@ -69,7 +69,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure all GKE clusters do not have basic auth and have client certs auth disabled
   gke_clusters.each do |gke_cluster|
     describe "[#{gcp_project_id}] GKE Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}'s" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       #its('master_auth.username') { should cmp nil }
       it "Basic Authentication should be disabled" do
         subject.master_auth.username.should cmp(nil)
