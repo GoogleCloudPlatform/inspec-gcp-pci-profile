@@ -93,7 +93,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # GKE Clusters should not use Legacy ABAC in favor of RBAC
   gke_clusters.each do |gke_cluster|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] GKE Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       it "should enable RBAC" do
         expect(subject.legacy_abac.enabled).not_to cmp(true)
       end
