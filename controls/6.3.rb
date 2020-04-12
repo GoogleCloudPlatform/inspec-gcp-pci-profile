@@ -53,8 +53,8 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Binary Auth should be configured to permit only allowed/signed images from known registries.
   gke_clusters.each do |gke_cluster|
     describe "[#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
-      it { should have_binary_authorization_enabled }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      its('binary_authorization.enabled') { should eq true }
     end
   end
 
