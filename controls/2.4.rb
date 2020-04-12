@@ -48,6 +48,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{gcp_project_id}] The object for CAI inventory at #{cai_inventory_bucket_name}/#{cai_inventory_file_path}" do
     subject { google_storage_bucket_object(bucket: cai_inventory_bucket_name,  object: cai_inventory_file_path) }
     it { should exist }
-    its('updated_date') { should be >= (Time.now - cai_inventory_age_seconds) }
+    its('time_updated') { should be >= (Time.now - cai_inventory_age_seconds) }
   end
 end
