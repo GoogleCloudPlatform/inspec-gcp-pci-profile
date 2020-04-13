@@ -64,25 +64,25 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Admins" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.admin') }
       it "matches the KMS admins allow list" do
-        expect(subject.members).to cmp(kms_admins_list).or eq(nil)
+        expect(subject.members).to cmp(kms_admins_list).or eq(nil).or cmp([])
       end
     end
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter are on a white list" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.encrypter') }
       it "matches the KMS Encrypters allow list" do
-        expect(subject.members).to cmp(kms_encrypters_list).or eq(nil)
+        expect(subject.members).to cmp(kms_encrypters_list).or eq(nil).or cmp([])
       end
     end
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Decrypter are on a white list" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.decrypter') }
       it "matches the KMS Decrypters allow list" do
-        expect(subject.members).to cmp(kms_decrypters_list).or eq(nil)
+        expect(subject.members).to cmp(kms_decrypters_list).or eq(nil).or cmp([])
       end
     end
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter/Decrypter are on a white list" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.encrypterdecrypter') }
       it "matches the KMS EncrypterDecrypters allow list" do
-        expect(subject.members).to cmp(kms_encrypterdecrypters_list).or eq(nil)
+        expect(subject.members).to cmp(kms_encrypterdecrypters_list).or eq(nil).or cmp([])
       end
     end
   end
