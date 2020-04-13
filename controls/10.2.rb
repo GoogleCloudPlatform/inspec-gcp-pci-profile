@@ -46,9 +46,12 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Subnets should have VPC flow logs enabled
   google_compute_regions(project: gcp_project_id).region_names.each do |region|
     google_compute_subnetworks(project: gcp_project_id, region: region).subnetwork_names.each do |subnet|
+      subnet_obj = google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet)
       describe "[#{gcp_project_id}] #{region}/#{subnet}" do
-        subject { google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) }
-        its('log_config.enable') { should be true }
+        subject { subnet_obj }
+        if subnet_obj.methods.include?(:log_config) == true
+          its('log_config.enable') { should be true }
+        end
       end
     end
   end
@@ -145,7 +148,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a whitelist of users/SAs/groups have access to logging viewer" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/logging.viewer') }
     it "matches the Logging Viewer allow list" do
-      expect(subject.members).to cmp(logging_viewer_list).or eq(nil)
+      expect(subject.members).to cmp(logging_viewer_list).or eq(nil).or cmp([])
     end
   end
 
