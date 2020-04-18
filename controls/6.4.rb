@@ -21,8 +21,8 @@ pci_url = attribute('pci_url')
 pci_section = '6.4'
 
 environment_label = attribute('environment_label')
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Follow change control processes and procedures for all changes to system components"
 

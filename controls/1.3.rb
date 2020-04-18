@@ -20,8 +20,8 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '1.3'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 fw_change_control_id_regex = attribute('fw_change_control_id_regex')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Prohibit direct public access between the Internet and any system component in the cardholder data environment."

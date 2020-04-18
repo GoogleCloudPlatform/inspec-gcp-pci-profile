@@ -20,8 +20,8 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '7.2'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Establish an access control system(s) for systems components that restricts access based on a user’s need to know, and is set to “deny all” unless specifically allowed. "
 

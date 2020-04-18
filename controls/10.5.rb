@@ -19,7 +19,7 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '10.5'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
 gcs_logging_buckets = attribute('gcs_logging_buckets')
 logging_viewer_list = attribute('logging_viewer_list')
 logging_admin_list = attribute('logging_admin_list')
