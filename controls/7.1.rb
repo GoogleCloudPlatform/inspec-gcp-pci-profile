@@ -20,7 +20,7 @@ pci_url = attribute('pci_url')
 pci_section = '7.1'
 
 project_owners_list = attribute('project_owners_list')
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Limit access to system components and cardholder data to only those individuals whose job requires such access."
 

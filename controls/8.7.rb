@@ -50,7 +50,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure MemoryStore Admins" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/redis.admin') }
     it "matches the MemoryStore Admins allow list" do
-      expect(subject.members).to cmp(memorystore_admins_list).or eq([])
+      expect(subject.members).to cmp(memorystore_admins_list).or eq(nil).or cmp([])
     end
   end
 
@@ -58,7 +58,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure CloudSQL Admins" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudsql.admin') }
     it "matches the CloudSQL Admins allow list" do
-      expect(subject.members).to cmp(cloudsql_admins_list).or eq([])
+      expect(subject.members).to cmp(cloudsql_admins_list).or eq(nil).or cmp([])
     end
   end
 
@@ -66,7 +66,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure CloudSQL Clients" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudsql.client') }
     it "matches the CloudSQL client allow list" do
-      expect(subject.members).to cmp(cloudsql_clients_list).or eq([])
+      expect(subject.members).to cmp(cloudsql_clients_list).or eq(nil).or cmp([])
     end
   end
 
@@ -74,7 +74,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure BigQuery Admins" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/bigquery.admin') }
     it "matches the BigQuery Admins allow list" do
-      expect(subject.members).to cmp(bq_admins_list).or eq([])
+      expect(subject.members).to cmp(bq_admins_list).or eq(nil).or cmp([])
     end
   end
 
@@ -82,7 +82,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure Cloud Spanner Admins" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/spanner.admin') }
     it "matches the Cloud Spanner Admins allow list" do
-      expect(subject.members).to cmp(spanner_admins_list).or eq([])
+      expect(subject.members).to cmp(spanner_admins_list).or eq(nil).or cmp([])
     end
   end
 

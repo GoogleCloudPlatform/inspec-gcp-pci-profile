@@ -45,10 +45,13 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Subnets should have VPC flow logs enabled
   google_compute_regions(project: gcp_project_id).region_names.each do |region|
-    google_compute_subnetworks(project: gcp_project_id, region: region).where(enable_flow_log: false).subnetwork_names.each do |subnet|
-      describe "[#{gcp_project_id}] #{region}/#{subnet} without VPC Flow logs" do
-        subject { google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet) }
-        its('name') { should cmp nil }
+    google_compute_subnetworks(project: gcp_project_id, region: region).subnetwork_names.each do |subnet|
+      subnet_obj = google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet)
+      describe "[#{gcp_project_id}] #{region}/#{subnet}" do
+        subject { subnet_obj }
+        if subnet_obj.methods.include?(:log_config) == true
+          its('log_config.enable') { should be true }
+        end
       end
     end
   end
@@ -57,8 +60,8 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   google_storage_buckets(project: gcp_project_id).bucket_names.each do |bucket|
     next if bucket =~ /#{bucket_logging_ignore_regex}/
     describe "[#{gcp_project_id}] GCS Bucket #{bucket}" do
-      subject { google_storage_bucket(name: bucket) }
-      it { should have_logging_enabled }
+      subject { google_storage_bucket(name: bucket).logging }
+      its('log_bucket') { should_not eq nil }
     end
   end
 
@@ -145,7 +148,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a whitelist of users/SAs/groups have access to logging viewer" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/logging.viewer') }
     it "matches the Logging Viewer allow list" do
-      expect(subject.members).to cmp(logging_viewer_list).or eq([])
+      expect(subject.members).to cmp(logging_viewer_list).or eq(nil).or cmp([])
     end
   end
 

@@ -55,11 +55,14 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       google_kms_crypto_keys(project: gcp_project_id, location: location, key_ring_name: keyring).crypto_key_names.each do |keyname|
         sleep 6
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
+        rotation_period_int = key.rotation_period.delete_suffix('s').to_i
         if key.primary_state == "ENABLED"
-          describe "[#{gcp_project_id}] #{key.name.sub('projects/', '').sub('locations/','').sub('keyRings/','').sub('cryptoKeys/','')}" do
+          describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
             subject { key }
-            its('rotation_period_seconds') { should be <= kms_rotation_period_seconds }
-            its('next_rotation_time_date') { should be <= (Time.now + kms_rotation_period_seconds) }
+            it "should have a lower or equal rotation period than #{kms_rotation_period_seconds}" do
+              expect(rotation_period_int).to be <= kms_rotation_period_seconds
+            end
+            its('next_rotation_time') { should be <= (Time.now + kms_rotation_period_seconds) }
           end
         end
       end

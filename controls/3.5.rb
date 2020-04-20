@@ -64,29 +64,29 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Admins" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.admin') }
       it "matches the KMS admins allow list" do
-        expect(subject.members).to cmp(kms_admins_list).or eq([])
+        expect(subject.members).to cmp(kms_admins_list).or eq(nil).or cmp([])
       end
     end
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter are on a white list" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.encrypter') }
       it "matches the KMS Encrypters allow list" do
-        expect(subject.members).to cmp(kms_encrypters_list).or eq([])
+        expect(subject.members).to cmp(kms_encrypters_list).or eq(nil).or cmp([])
       end
     end
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Decrypter are on a white list" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.decrypter') }
       it "matches the KMS Decrypters allow list" do
-        expect(subject.members).to cmp(kms_decrypters_list).or eq([])
+        expect(subject.members).to cmp(kms_decrypters_list).or eq(nil).or cmp([])
       end
     end
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter/Decrypter are on a white list" do
       subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.encrypterdecrypter') }
       it "matches the KMS EncrypterDecrypters allow list" do
-        expect(subject.members).to cmp(kms_encrypterdecrypters_list).or eq([])
+        expect(subject.members).to cmp(kms_encrypterdecrypters_list).or eq(nil).or cmp([])
       end
     end
   end
-  
+
 end
 
 # 3.5.3
@@ -121,9 +121,9 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       google_kms_crypto_keys(project: gcp_project_id, location: location, key_ring_name: keyring).crypto_key_names.each do |keyname|
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
         if key.primary_state == "ENABLED"
-          describe "[#{gcp_project_id}] #{key.name.sub('projects/', '').sub('locations/','').sub('keyRings/','').sub('cryptoKeys/','')}" do
+          describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
             subject { key }
-            its('primary.protection_level') { should match /HSM/i }
+            its('version_template.protection_level') { should match /HSM/i }
           end
         end
       end
@@ -156,7 +156,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   locations = google_compute_regions(project: gcp_project_id).region_names
   locations << 'global'
 
-  # Ensure all KMS Keys in each Keyring are HSM-backed.
+  # Ensure all KMS Keys are in the fewest locations possible
   keyring_locations = []
   locations.each do |location|
     google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do |keyring|

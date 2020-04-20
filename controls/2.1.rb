@@ -21,8 +21,8 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '2.1'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Always change vendor-supplied defaults and remove or disable unnecessary default accounts"
 
@@ -69,7 +69,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure all GKE clusters do not have basic auth and have client certs auth disabled
   gke_clusters.each do |gke_cluster|
     describe "[#{gcp_project_id}] GKE Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}'s" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       #its('master_auth.username') { should cmp nil }
       it "Basic Authentication should be disabled" do
         subject.master_auth.username.should cmp(nil)

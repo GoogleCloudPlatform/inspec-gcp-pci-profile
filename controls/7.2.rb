@@ -20,8 +20,8 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '7.2'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Establish an access control system(s) for systems components that restricts access based on a user’s need to know, and is set to “deny all” unless specifically allowed. "
 
@@ -93,7 +93,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # GKE Clusters should not use Legacy ABAC in favor of RBAC
   gke_clusters.each do |gke_cluster|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] GKE Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       it "should enable RBAC" do
         expect(subject.legacy_abac.enabled).not_to cmp(true)
       end

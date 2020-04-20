@@ -26,7 +26,10 @@ supports:
 depends:
   - name: inspec-gcp
     git: https://github.com/inspec/inspec-gcp.git
-    tag: v0.21.4
+    tag: v1.0.0
+  - name: inspec-gcp-cis-pci
+    url: https://github.com/inspec/inspec-gcp-cis-pci.git
+    tag: v1.1.0
 inputs:
 - name: gcp_project_id
   description: 'The GCP project identifier.'

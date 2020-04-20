@@ -19,7 +19,7 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '10.5'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
 gcs_logging_buckets = attribute('gcs_logging_buckets')
 logging_viewer_list = attribute('logging_viewer_list')
 logging_admin_list = attribute('logging_admin_list')
@@ -52,7 +52,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a whitelist of users/SAs/groups have access to logging viewer" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/logging.viewer') }
     it "matches the Logging Viewer allow list" do
-      expect(subject.members).to cmp(logging_viewer_list).or eq([])
+      expect(subject.members).to cmp(logging_viewer_list).or eq(nil).or cmp([])
     end
   end
 
@@ -84,7 +84,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a whitelist of users/SAs/groups have access to logging Admin" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/logging.admin') }
     it "matches the Logging Admin allow list" do
-      expect(subject.members).to cmp(logging_admin_list).or eq([])
+      expect(subject.members).to cmp(logging_admin_list).or eq(nil).or cmp([])
     end
   end
 
@@ -115,7 +115,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure that Stackdriver Logging is enabled on all GKE Clusters
   gke_clusters.each do |gke_cluster|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       its('logging_service') { should match /^logging.googleapis.com/ }
     end
   end
@@ -148,7 +148,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Logging bucket: #{bucket}" do
       subject { google_storage_bucket(name: bucket) }
       it { should exist }
-      it { should have_versioning_enabled }
+      its('versioning.enabled') { should eq true }
     end
   end
 

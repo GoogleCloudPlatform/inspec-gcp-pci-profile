@@ -20,8 +20,8 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '1.3'
 
-gke_clusters = get_gke_clusters(gcp_project_id, gcp_gke_locations)
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 fw_change_control_id_regex = attribute('fw_change_control_id_regex')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Prohibit direct public access between the Internet and any system component in the cardholder data environment."
@@ -170,7 +170,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # GKE Clusters have private API and nodes
   gke_clusters.each do |gke_cluster|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
-      subject { google_container_regional_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
+      subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
       its('private_cluster_config.enable_private_endpoint') { should cmp true }
       its('private_cluster_config.enable_private_nodes') { should cmp true }
     end

@@ -43,9 +43,17 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Ensure project-level export sink is configured
+  empty_filter_sinks = []
+  google_logging_project_sinks(project: gcp_project_id).names.each do |sink_name|
+    if google_logging_project_sink(project: gcp_project_id, name: sink_name).filter == nil
+      empty_filter_sinks.push(sink_name)
+    end
+  end
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Project level Log sink with an empty filter" do
-    subject { google_logging_project_sinks(project: gcp_project_id).where(sink_filter: nil) }
-    it { should exist }
+    subject { empty_filter_sinks }
+    it "is expected to exist" do
+      expect(empty_filter_sinks.count).to be > 0
+    end
   end
 
   # Ensure project ownership changes filter exists

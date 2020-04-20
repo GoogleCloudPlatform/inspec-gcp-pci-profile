@@ -19,7 +19,7 @@ pci_version = attribute('pci_version')
 pci_url = attribute('pci_url')
 pci_section = '8.5'
 
-gce_instances = get_gce_instances(gcp_project_id, gce_zones)
+gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Do not use group, shared, or generic IDs, passwords, or other authentication methods"
 
