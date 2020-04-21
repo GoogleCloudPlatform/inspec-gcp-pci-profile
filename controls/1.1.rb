@@ -21,6 +21,10 @@ pci_section = '1.1'
 
 fw_change_control_id_regex = attribute('fw_change_control_id_regex')
 fw_override_control_id_regex = attribute('fw_override_control_id_regex')
+fw_checked_insecure_tcp_ports = attribute('fw_checked_insecure_tcp_ports')
+fw_checked_insecure_udp_ports = attribute('fw_checked_insecure_udp_ports')
+dmz_login_ports = attribute('dmz_login_ports')
+
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Establish and implement firewall and router configuration standards"
 
@@ -77,7 +81,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').firewall_names.each do |firewall_name|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] #{firewall_name}" do
       subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
-      ['22', '3389', '10000'].each do |port|
+      dmz_login_ports.each do |port|
         it "should not allow #{port} from 0.0.0.0/0" do
           expect((subject.allow_port_protocol?(port, 'tcp')) && (subject.allow_ip_ranges? ['0.0.0.0/0'])).to eq(false)
         end
@@ -111,7 +115,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Firewall Rules for insecure ports have description that includes the overriding change control ID
   google_compute_firewalls(project: gcp_project_id).where{firewall_name !~ /^gke-/ }.firewall_names.each do |firewall_name|
     fwrule = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    ['21', '23', '25', '445', '31337'].each do |port|
+    fw_checked_insecure_tcp_ports.each do |port|
       if fwrule.allow_port_protocol?("#{port}",'tcp')
         describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Insecure port tcp/#{port} in #{firewall_name}" do
           subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
@@ -119,7 +123,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
         end
       end
     end
-    ['53', '69', '161', '162'].each do |port|
+    fw_checked_insecure_udp_ports.each do |port|
       if fwrule.allow_port_protocol?("#{port}",'udp')
         describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Insecure port udp/#{port} in #{firewall_name}" do
           subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
