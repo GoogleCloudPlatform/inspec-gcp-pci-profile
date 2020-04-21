@@ -187,3 +187,27 @@ inputs:
   type: array
   value:
     - ""
+- name: dmz_login_ports
+  description: 'The list of ports that are used to login to servers in the corporate network'
+  type: array
+  value:
+    - '22'
+    - '3389'
+    - '10000'
+- name: fw_checked_insecure_tcp_ports
+  description: 'The list of tcp ports that are required to have description that includes the overriding change control ID'
+  type: array
+  value:
+    - '21'
+    - '23'
+    - '25'
+    - '445'
+    - '31337'
+- name: fw_checked_insecure_udp_ports
+  description: 'The list of udp ports that are required to have description that includes the overriding change control ID'
+  type: array
+  value:
+    - '53'
+    - '69'
+    - '161'
+    - '162'
