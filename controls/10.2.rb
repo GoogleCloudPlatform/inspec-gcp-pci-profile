@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,11 +46,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   google_compute_regions(project: gcp_project_id).region_names.each do |region|
     google_compute_subnetworks(project: gcp_project_id, region: region).subnetwork_names.each do |subnet|
       subnet_obj = google_compute_subnetwork(project: gcp_project_id, region: region, name: subnet)
+      next unless subnet_obj.methods.include?(:log_config) == true
       describe "[#{gcp_project_id}] #{region}/#{subnet}" do
         subject { subnet_obj }
-        if subnet_obj.methods.include?(:log_config) == true
-          its('log_config.enable') { should be true }
-        end
+        its('log_config.enable') { should be true }
       end
     end
   end
@@ -64,7 +62,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       its('log_bucket') { should_not eq nil }
     end
   end
-
 end
 
 # 10.2.1
@@ -93,7 +90,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     its('default_types') { should include 'DATA_READ' }
     its('default_types') { should include 'DATA_WRITE' }
   end
-
 end
 
 # 10.2.2
@@ -121,7 +117,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     subject { google_project_logging_audit_config(project: gcp_project_id) }
     it { should exist }
   end
-
 end
 
 # 10.2.3
@@ -151,7 +146,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       expect(subject.members).to cmp(logging_viewer_list).or eq(nil).or cmp([])
     end
   end
-
 end
 
 # 10.2.6

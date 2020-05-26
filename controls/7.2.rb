@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,7 +51,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   end
 
   # Ensure all networks do not have default FW rules
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').where{ firewall_name =~ /^default-allow-/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').where { firewall_name =~ /^default-allow-/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
     next if fw.disabled == true
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Firewall Rule: #{firewall_name}" do
@@ -63,10 +62,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Ensure the default compute service account is not attached to GCE/GKE instances
   gce_instances.each do |instance|
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       it "service account should not be the Default Compute Service Account" do
-        expect(subject.service_accounts[0].email).not_to match /-compute@developer.gserviceaccount.com$/
+        expect(subject.service_accounts[0].email).not_to match(/-compute@developer.gserviceaccount.com$/)
       end
     end
   end
@@ -76,15 +75,15 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] The IAM Role 'roles/editor'" do
       subject { google_project_iam_binding(project: gcp_project_id, role: role) }
       it "should not be bound to the default compute service account" do
-        subject.members.should_not include /-compute@developer.gserviceaccount.com/
+        subject.members.should_not include(/-compute@developer.gserviceaccount.com/)
       end
     end
   end
 
-  # GCE Instances should block ssh keys  
+  # GCE Instances should block ssh keys
   gce_instances.each do |instance|
     next if instance[:name] =~ /^gke-/
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       its('block_project_ssh_keys') { should cmp true }
     end
@@ -102,7 +101,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # GCE/GKE Instances should not have an OAuth Scope of cloud-platform
   gce_instances.each do |instance|
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       it "should not have an OAuth Scope of 'cloud-platform'" do
         expect(subject.service_account_scopes).to_not include('https://www.googleapis.com/auth/cloud-platform')
@@ -120,5 +119,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       end
     end
   end
-
 end

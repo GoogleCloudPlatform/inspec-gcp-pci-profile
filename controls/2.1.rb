@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,10 +47,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Ensure the default compute service account is not attached to GCE/GKE instances
   gce_instances.each do |instance|
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       it "service account should not be the Default Compute Service Account" do
-        expect(subject.service_accounts[0].email).not_to match /-compute@developer.gserviceaccount.com$/
+        expect(subject.service_accounts[0].email).not_to match(/-compute@developer.gserviceaccount.com$/)
       end
     end
   end
@@ -61,7 +60,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{gcp_project_id}] The IAM Role 'roles/editor'" do
       subject { google_project_iam_binding(project: gcp_project_id, role: role) }
       it "should not be bound to the default compute service account" do
-        subject.members.should_not include /-compute@developer.gserviceaccount.com/
+        subject.members.should_not include(/-compute@developer.gserviceaccount.com/)
       end
     end
   end
@@ -70,7 +69,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   gke_clusters.each do |gke_cluster|
     describe "[#{gcp_project_id}] GKE Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}'s" do
       subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
-      #its('master_auth.username') { should cmp nil }
       it "Basic Authentication should be disabled" do
         subject.master_auth.username.should cmp(nil)
       end
@@ -80,5 +78,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       end
     end
   end
-
 end

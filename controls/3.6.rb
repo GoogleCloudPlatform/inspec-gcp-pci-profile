@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -56,17 +55,15 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
         sleep 6
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
         rotation_period_int = key.rotation_period.delete_suffix('s').to_i
-        if key.primary_state == "ENABLED"
-          describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
-            subject { key }
-            it "should have a lower or equal rotation period than #{kms_rotation_period_seconds}" do
-              expect(rotation_period_int).to be <= kms_rotation_period_seconds
-            end
-            its('next_rotation_time') { should be <= (Time.now + kms_rotation_period_seconds) }
+        next unless key.primary_state == "ENABLED"
+        describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
+          subject { key }
+          it "should have a lower or equal rotation period than #{kms_rotation_period_seconds}" do
+            expect(rotation_period_int).to be <= kms_rotation_period_seconds
           end
+          its('next_rotation_time') { should be <= (Time.now + kms_rotation_period_seconds) }
         end
       end
     end
   end
-
 end

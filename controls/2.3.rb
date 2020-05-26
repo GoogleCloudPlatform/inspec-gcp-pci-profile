@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,7 +42,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Ensure telnet is not allowed by any non-GKE firewall rule
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').where{ firewall_name !~ /^gke-/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').where { firewall_name !~ /^gke-/ }.firewall_names.each do |firewall_name|
     describe "[#{gcp_project_id}] #{firewall_name}" do
       subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
       it "should not allow Telnet (tcp/23)" do

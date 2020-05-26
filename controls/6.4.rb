@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,7 +47,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # GCE/GKE Instances have a label indicating the environment
   gce_instances.each do |instance|
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       it "should have an instance label key of #{environment_label}" do
         expect(subject.labels_keys).to include(/#{environment_label}/)
@@ -63,5 +62,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       expect(subject.length).to be <= 1
     end
   end
-
 end

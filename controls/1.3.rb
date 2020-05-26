@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,13 +49,14 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Ensure ingress from 0.0.0.0 only to target tags or service accounts
   ingress_from_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'INGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    if !fw.disabled && fw.respond_to?('source_ranges') && !fw.source_ranges.nil? && fw.allow_ip_range_list(['0.0.0.0/0'])
-      ingress_from_all_fw_rules << firewall_name
-    end
+    ingress_from_all_fw_rules << firewall_name if !fw.disabled \
+      && fw.respond_to?('source_ranges') \
+      && !fw.source_ranges.nil? \
+      && fw.allow_ip_range_list(['0.0.0.0/0'])
   end
-  if (ingress_from_all_fw_rules == [])
+  if ingress_from_all_fw_rules == []
     describe "There are no applicable firewall rules" do
       skip 'There are no applicable firewall rules in this project'
     end
@@ -69,11 +69,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
           it { should_not exist }
         end
       end
-      if fw.allow_port_protocol?("0","all")
-        describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ingress firewall rule #{fw_rule} that allows all ports/protocols" do
-          subject { fw }
-          it { should_not exist }
-        end
+      next unless fw.allow_port_protocol?("0", "all")
+      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ingress firewall rule #{fw_rule} that allows all ports/protocols" do
+        subject { fw }
+        it { should_not exist }
       end
     end
   end
@@ -101,28 +100,28 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Explicit egress deny all rule in place
   egress_deny_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    if !fw.disabled && fw.respond_to?('denied') && !fw.denied.nil? && fw.denied[0].ip_protocol == "all"
-      egress_deny_all_fw_rules << firewall_name
-    end
+    egress_deny_all_fw_rules << firewall_name if !fw.disabled \
+      && fw.respond_to?('denied') \
+      && !fw.denied.nil? \
+      && fw.denied[0].ip_protocol == "all"
   end
-  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}]" do 
+  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}]" do
     it "has a deny all egress rule" do
       expect(egress_deny_all_fw_rules.count).to be >= 1
     end
   end
 
   # Non-GKE Firewall egress Rules have description that includes the change control ID
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] #{firewall_name}'s" do
       subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
       it "description should include a change control ID" do
-        subject.description.should match /#{fw_change_control_id_regex}/
+        subject.description.should match(/#{fw_change_control_id_regex}/)
       end
     end
   end
-
 end
 
 # 1.3.6

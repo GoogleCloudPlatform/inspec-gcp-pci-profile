@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,10 +50,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   locations = google_compute_regions(project: gcp_project_id).region_names
   locations << 'global'
 
-  keyrings = false 
+  keyrings = false
   locations.each do |location|
     sleep 6
-    if google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.count > 0
+    if google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.count.positive?
       keyrings = true
       break
     end
@@ -86,7 +85,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       end
     end
   end
-
 end
 
 # 3.5.3
@@ -120,16 +118,14 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do |keyring|
       google_kms_crypto_keys(project: gcp_project_id, location: location, key_ring_name: keyring).crypto_key_names.each do |keyname|
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
-        if key.primary_state == "ENABLED"
-          describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
-            subject { key }
-            its('version_template.protection_level') { should match /HSM/i }
-          end
+        next unless key.primary_state == "ENABLED"
+        describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
+          subject { key }
+          its('version_template.protection_level') { should match(/HSM/i) }
         end
       end
     end
   end
-
 end
 
 # 3.5.4
@@ -159,15 +155,14 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure all KMS Keys are in the fewest locations possible
   keyring_locations = []
   locations.each do |location|
-    google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do |keyring|
+    google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do
       keyring_locations << location
     end
   end
   keyring_locations.sort!.uniq! unless keyring_locations.empty?
 
-  describe "[#{gcp_project_id}] KMS Regions #{ keyring_locations }" do
+  describe "[#{gcp_project_id}] KMS Regions #{keyring_locations}" do
     subject { keyring_locations }
     it { should be_in kms_regions_list.sort }
   end
-
 end
