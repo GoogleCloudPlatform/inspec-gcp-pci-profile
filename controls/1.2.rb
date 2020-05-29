@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '1.2'
 
-allow_all_tcp_ports = attribute('allow_all_tcp_ports')
-allow_all_udp_ports = attribute('allow_all_udp_ports')
+allow_all_tcp_ports = input('allow_all_tcp_ports')
+allow_all_udp_ports = input('allow_all_udp_ports')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Build firewall and router configurations that restrict connections between untrusted networks and any system components in the cardholder data environment."
 

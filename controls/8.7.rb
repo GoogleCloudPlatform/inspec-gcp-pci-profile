@@ -13,16 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '8.7'
 
-memorystore_admins_list = attribute('memorystore_admins_list')
-cloudsql_admins_list = attribute('cloudsql_admins_list')
-cloudsql_clients_list = attribute('cloudsql_clients_list')
-bq_admins_list = attribute('bq_admins_list')
-spanner_admins_list = attribute('spanner_admins_list')
+memorystore_admins_list = input('memorystore_admins_list')
+cloudsql_admins_list = input('cloudsql_admins_list')
+cloudsql_clients_list = input('cloudsql_clients_list')
+bq_admins_list = input('bq_admins_list')
+spanner_admins_list = input('spanner_admins_list')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] All access to any database containing cardholder data (including access by applications, administrators, and all other users) is restricted."
 

@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '2.4'
 
-cai_inventory_bucket_name = attribute('cai_inventory_bucket_name')
-cai_inventory_file_path = attribute('cai_inventory_file_path')
-cai_inventory_age_seconds = attribute('cai_inventory_age_seconds')
+cai_inventory_bucket_name = input('cai_inventory_bucket_name')
+cai_inventory_file_path = input('cai_inventory_file_path')
+cai_inventory_age_seconds = input('cai_inventory_age_seconds')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Maintain an inventory of system components that are in scope for PCI DSS."
 

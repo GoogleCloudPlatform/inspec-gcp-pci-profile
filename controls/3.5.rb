@@ -13,17 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '3.5'
 
-kms_regions_list = attribute('kms_regions_list')
-kms_admins_list = attribute('kms_admins_list')
-kms_encrypters_list = attribute('kms_encrypters_list')
-kms_decrypters_list = attribute('kms_decrypters_list')
-kms_encrypterdecrypters_list = attribute('kms_encrypterdecrypters_list')
-kms_rotation_period_seconds = attribute('kms_rotation_period_seconds')
+kms_regions_list = input('kms_regions_list')
+kms_admins_list = input('kms_admins_list')
+kms_encrypters_list = input('kms_encrypters_list')
+kms_decrypters_list = input('kms_decrypters_list')
+kms_encrypterdecrypters_list = input('kms_encrypterdecrypters_list')
+kms_rotation_period_seconds = input('kms_rotation_period_seconds')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Document and implement procedures to protect keys used to secure stored cardholder data against disclosure and misuse"
 

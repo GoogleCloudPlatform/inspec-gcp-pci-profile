@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '10.6'
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Review logs and security events for all system components to identify anomalies or suspicious activity."
