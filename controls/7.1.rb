@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-gce_zones = attribute('gce_zones')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+gce_zones = input('gce_zones')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '7.1'
 
-project_owners_list = attribute('project_owners_list')
+project_owners_list = input('project_owners_list')
 gce_instances = GCECache(project: gcp_project_id, gce_zones: gce_zones).gce_instances_cache
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Limit access to system components and cardholder data to only those individuals whose job requires such access."

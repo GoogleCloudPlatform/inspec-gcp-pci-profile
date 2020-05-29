@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '10.2'
 
-logging_viewer_list = attribute('logging_viewer_list')
-bucket_logging_ignore_regex = attribute('bucket_logging_ignore_regex')
+logging_viewer_list = input('logging_viewer_list')
+bucket_logging_ignore_regex = input('bucket_logging_ignore_regex')
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Implement automated audit trails for all system components"
 

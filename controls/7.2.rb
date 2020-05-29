@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gcp_project_id = attribute('gcp_project_id')
-gcp_gke_locations = attribute('gcp_gke_locations')
-gce_zones = attribute('gce_zones')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+gcp_gke_locations = input('gcp_gke_locations')
+gce_zones = input('gce_zones')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '7.2'
 
 gke_clusters = GKECache(project: gcp_project_id, gke_locations: gcp_gke_locations).gke_clusters_cache

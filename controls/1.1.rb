@@ -14,16 +14,16 @@
 # limitations under the License.
 
 
-gcp_project_id = attribute('gcp_project_id')
-pci_version = attribute('pci_version')
-pci_url = attribute('pci_url')
+gcp_project_id = input('gcp_project_id')
+pci_version = input('pci_version')
+pci_url = input('pci_url')
 pci_section = '1.1'
 
-fw_change_control_id_regex = attribute('fw_change_control_id_regex')
-fw_override_control_id_regex = attribute('fw_override_control_id_regex')
-fw_checked_insecure_tcp_ports = attribute('fw_checked_insecure_tcp_ports')
-fw_checked_insecure_udp_ports = attribute('fw_checked_insecure_udp_ports')
-dmz_login_ports = attribute('dmz_login_ports')
+fw_change_control_id_regex = input('fw_change_control_id_regex')
+fw_override_control_id_regex = input('fw_override_control_id_regex')
+fw_checked_insecure_tcp_ports = input('fw_checked_insecure_tcp_ports')
+fw_checked_insecure_udp_ports = input('fw_checked_insecure_udp_ports')
+dmz_login_ports = input('dmz_login_ports')
 
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Establish and implement firewall and router configuration standards"
