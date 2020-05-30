@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,11 +44,9 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Explicit egress deny all rule in place
   egress_deny_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    if fw.respond_to?('denied') && !fw.denied.nil? && fw.denied[0].ip_protocol == "all"
-      egress_deny_all_fw_rules << firewall_name
-    end
+    egress_deny_all_fw_rules << firewall_name if fw.respond_to?('denied') && !fw.denied.nil? && fw.denied[0].ip_protocol == "all"
   end
   describe "[#{gcp_project_id}]" do
     it "has a deny all egress rule" do
@@ -59,8 +56,8 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # At least one egress rule in place
   egress_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    egress_fw_rules << firewall_name 
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+    egress_fw_rules << firewall_name
   end
   describe "[#{gcp_project_id}]" do
     it "has at least one egress rule" do
@@ -70,11 +67,11 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Does not have an allow-all egress rule
   egress_allow_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    if fw.respond_to?('allowed') && !fw.allowed.nil? && fw.allowed[0].ip_protocol == "all"
-      egress_allow_all_fw_rules << firewall_name
-    end
+    egress_allow_all_fw_rules << firewall_name if fw.respond_to?('allowed') \
+      && !fw.allowed.nil? \
+      && fw.allowed[0].ip_protocol == "all"
   end
   describe "[#{gcp_project_id}]" do
     it "does not have an allow all egress rule" do
@@ -84,14 +81,11 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Specific egress TCP ports allowed to 0.0.0.0/0
   egress_allow_tcp_to_any_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    if fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
-      fw.allowed.each do |allow_item|
-        if allow_item.ip_protocol == "tcp"
-          egress_allow_tcp_to_any_fw_rules += allow_item.ports
-        end
-      end
+    next unless fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
+    fw.allowed.each do |allow_item|
+      egress_allow_tcp_to_any_fw_rules += allow_item.ports if allow_item.ip_protocol == "tcp"
     end
   end
   describe "[#{gcp_project_id}]" do
@@ -99,17 +93,14 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       expect(egress_allow_tcp_to_any_fw_rules).to eq(allow_all_tcp_ports)
     end
   end
-  
+
   # Specific egress UDP ports allowed to 0.0.0.0/0
   egress_allow_udp_to_any_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    if fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
-      fw.allowed.each do |allow_item|
-        if allow_item.ip_protocol == "udp"
-          egress_allow_udp_to_any_fw_rules += allow_item.ports
-        end
-      end
+    next unless fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
+    fw.allowed.each do |allow_item|
+      egress_allow_udp_to_any_fw_rules += allow_item.ports if allow_item.ip_protocol == "udp"
     end
   end
   describe "[#{gcp_project_id}]" do
@@ -117,5 +108,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       expect(egress_allow_udp_to_any_fw_rules).to eq(allow_all_udp_ports)
     end
   end
-
 end

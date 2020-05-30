@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 gcp_project_id = input('gcp_project_id')
 pci_version = input('pci_version')
 pci_url = input('pci_url')
@@ -24,7 +22,6 @@ fw_override_control_id_regex = input('fw_override_control_id_regex')
 fw_checked_insecure_tcp_ports = input('fw_checked_insecure_tcp_ports')
 fw_checked_insecure_udp_ports = input('fw_checked_insecure_udp_ports')
 dmz_login_ports = input('dmz_login_ports')
-
 
 title "[PCI-DSS-#{pci_version}][#{pci_section}] Establish and implement firewall and router configuration standards"
 
@@ -50,10 +47,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Non-GKE Firewall Rules have description that includes the change control ID
-  google_compute_firewalls(project: gcp_project_id).where{ firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] #{firewall_name}" do
       subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
-      its('description') { should match /#{fw_change_control_id_regex}/ }
+      its('description') { should match(/#{fw_change_control_id_regex}/) }
     end
   end
 end
@@ -83,7 +80,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
       dmz_login_ports.each do |port|
         it "should not allow #{port} from 0.0.0.0/0" do
-          expect((subject.allow_port_protocol?(port, 'tcp')) && (subject.allow_ip_ranges? ['0.0.0.0/0'])).to eq(false)
+          expect(subject.allow_port_protocol?(port, 'tcp') && (subject.allow_ip_ranges? ['0.0.0.0/0'])).to eq(false)
         end
       end
     end
@@ -113,22 +110,20 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Firewall Rules for insecure ports have description that includes the overriding change control ID
-  google_compute_firewalls(project: gcp_project_id).where{firewall_name !~ /^gke-/ }.firewall_names.each do |firewall_name|
+  google_compute_firewalls(project: gcp_project_id).where { firewall_name !~ /^gke-/ }.firewall_names.each do |firewall_name|
     fwrule = google_compute_firewall(project: gcp_project_id, name: firewall_name)
     fw_checked_insecure_tcp_ports.each do |port|
-      if fwrule.allow_port_protocol?("#{port}",'tcp')
-        describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Insecure port tcp/#{port} in #{firewall_name}" do
-          subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
-          its('description') { should match /#{fw_override_control_id_regex}/ }
-        end
+      next unless fwrule.allow_port_protocol?("#{port}", 'tcp')
+      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Insecure port tcp/#{port} in #{firewall_name}" do
+        subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
+        its('description') { should match(/#{fw_override_control_id_regex}/) }
       end
     end
     fw_checked_insecure_udp_ports.each do |port|
-      if fwrule.allow_port_protocol?("#{port}",'udp')
-        describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Insecure port udp/#{port} in #{firewall_name}" do
-          subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
-          its('description') { should match /#{fw_override_control_id_regex}/ }
-        end
+      next unless fwrule.allow_port_protocol?("#{port}", 'udp')
+      describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Insecure port udp/#{port} in #{firewall_name}" do
+        subject { google_compute_firewall(project: gcp_project_id, name: firewall_name) }
+        its('description') { should match(/#{fw_override_control_id_regex}/) }
       end
     end
   end

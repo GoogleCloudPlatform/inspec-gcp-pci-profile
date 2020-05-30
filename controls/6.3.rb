@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,5 +56,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       its('binary_authorization.enabled') { should eq true }
     end
   end
-
 end

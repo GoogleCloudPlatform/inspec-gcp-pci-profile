@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,7 +54,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       expect(subject.members).to cmp(logging_viewer_list).or eq(nil).or cmp([])
     end
   end
-
 end
 
 # 10.5.2
@@ -87,7 +85,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       expect(subject.members).to cmp(logging_admin_list).or eq(nil).or cmp([])
     end
   end
-
 end
 
 # 10.5.4
@@ -116,10 +113,9 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   gke_clusters.each do |gke_cluster|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cluster #{gke_cluster[:location]}/#{gke_cluster[:cluster_name]}" do
       subject { google_container_cluster(project: gcp_project_id, location: gke_cluster[:location], name: gke_cluster[:cluster_name]) }
-      its('logging_service') { should match /^logging.googleapis.com/ }
+      its('logging_service') { should match(/^logging.googleapis.com/) }
     end
   end
-
 end
 
 # 10.5.5
@@ -151,5 +147,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       its('versioning.enabled') { should eq true }
     end
   end
-
 end

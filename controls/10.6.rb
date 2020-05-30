@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,14 +44,13 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure project-level export sink is configured
   empty_filter_sinks = []
   google_logging_project_sinks(project: gcp_project_id).names.each do |sink_name|
-    if google_logging_project_sink(project: gcp_project_id, name: sink_name).filter == nil
-      empty_filter_sinks.push(sink_name)
-    end
+    empty_filter_sinks.push(sink_name) if google_logging_project_sink(project: gcp_project_id,
+                                                                      name: sink_name).filter.nil?
   end
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Project level Log sink with an empty filter" do
     subject { empty_filter_sinks }
     it "is expected to exist" do
-      expect(empty_filter_sinks.count).to be > 0
+      expect(empty_filter_sinks.count).to be_positive
     end
   end
 
@@ -66,7 +64,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure project ownership alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Project Ownership changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -88,7 +86,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure audit configuration alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter}.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Audit configuration changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -110,7 +108,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure custom role alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Custom Role changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -132,7 +130,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure VPC FW Rule alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] VPC FW Rule changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -154,7 +152,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure VPC Route Changes alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] VPC Route changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -176,7 +174,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure VPC Network alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] VPC Network changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -198,7 +196,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure Cloud Storage IAM alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cloud Storage changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -220,7 +218,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   # Ensure Cloud SQL alert policy is configured
   google_project_metrics(project: gcp_project_id).where(metric_filter: log_filter).metric_types.each do |metrictype|
     filter = "metric.type=\"#{metrictype}\" resource.type=\"audited_resource\""
-    google_project_alert_policies(project: gcp_project_id).where{ policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
+    google_project_alert_policies(project: gcp_project_id).where { policy_filter_list.include? filter }.where(policy_enabled_state: true).policy_names.each do |policy|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Cloud SQL changes alert policy" do
         subject { google_project_alert_policy_condition(policy: policy, filter: filter) }
         it { should exist }
@@ -231,5 +229,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       end
     end
   end
-
 end

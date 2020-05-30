@@ -1,4 +1,3 @@
-# encoding: utf-8
 # Copyright 2019 The inspec-gcp-pci-profile Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +48,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] IAM Role #{role}" do
       subject { google_project_iam_binding(project: gcp_project_id, role: role) }
       it "should not have any \"user:<users>@\" bound" do
-        subject.members.to_s.should_not match /user:/
+        subject.members.to_s.should_not match(/user:/)
       end
     end
   end
@@ -58,16 +57,16 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure Owners" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/owner') }
     it "matches the Owners allow list" do
-      expect(subject.members).to cmp(project_owners_list).or eq([])
+      expect(subject.members).to cmp(project_owners_list).or eq([]).or be_nil
     end
   end
 
   # Ensure the default compute service account is not attached to GCE/GKE instances
   gce_instances.each do |instance|
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s"  do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Instance: #{instance[:zone]}/#{instance[:name]}'s" do
       subject { google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]) }
       it "service account should not be the Default Compute Service Account" do
-        expect(subject.service_accounts[0].email).not_to match /-compute@developer.gserviceaccount.com$/
+        expect(subject.service_accounts[0].email).not_to match(/-compute@developer.gserviceaccount.com$/)
       end
     end
   end
@@ -77,15 +76,13 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   attached_service_accounts = []
   gce_instances.each do |instance|
     sa = google_compute_instance(project: gcp_project_id, zone: instance[:zone], name: instance[:name]).service_accounts
-    if sa.length > 0
-       attached_service_accounts << sa[0].email 
-    end
+    attached_service_accounts << sa[0].email if sa.length.positive?
   end
-  
+
   # The unique list of attached SAs to instances
   attached_service_accounts.uniq!
   # Search primitive role bindings for members that should not include these attached SAs
-  google_project_iam_bindings(project: gcp_project_id).where{ iam_binding_role == 'roles/editor' || iam_binding_role == 'roles/owner' || iam_binding_role == 'roles/viewer' }.iam_binding_roles.each do |role|
+  google_project_iam_bindings(project: gcp_project_id).where { iam_binding_role == 'roles/editor' || iam_binding_role == 'roles/owner' || iam_binding_role == 'roles/viewer' }.iam_binding_roles.each do |role|
     attached_service_accounts.each do |sa_name|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] ServiceAccount #{sa_name}" do
         subject { google_project_iam_binding(project: gcp_project_id, role: role) }
@@ -95,5 +92,4 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
       end
     end
   end
-
 end
