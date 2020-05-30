@@ -27,7 +27,7 @@ steps:
 
 - id: 'Verify InSpec controls'
   waitFor: ['Build Docker container']
-  name: gcr.io/${_GCP_PROJECT_ID}/inspec-gcp-cis-benchmark:${_PR_NUMBER}
+  name: gcr.io/${_GCP_PROJECT_ID}/inspec-gcp-pci-profile:${_PR_NUMBER}
   entrypoint: '/bin/sh'
   args: 
     - '-c'
