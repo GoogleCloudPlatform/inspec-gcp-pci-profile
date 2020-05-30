@@ -73,7 +73,7 @@ steps:
       gcs_logging_buckets: ["${_LOGGING_BUCKET}"]
       cai_inventory_bucket_name: "${_LOGGING_BUCKET}"
       cai_inventory_file_path: "asdf.json"
-      cai_inventory_age_seconds: 60
+      cai_inventory_age_seconds: 31536000
       gcs_pii_buckets: ["${_LOGGING_BUCKET}"]
       kms_regions_list: ['global', 'us-central1']
       kms_admins_list: ["serviceAccount:${_SA_ADMIN}"]
@@ -105,7 +105,7 @@ steps:
 - id: 'Test Compliance'
   waitFor: ['Run PCI Profile on in-scope project']
   name: mitre/inspec_tools
-  args: ['compliance', '-j', '/workspace/pci_report.json', '-i', '{failed.total.max: 2}']
+  args: ['compliance', '-j', '/workspace/pci_report.json', '-i', '{failed.total.max: 1}']
 
 - id: 'Store json Report'
   waitFor: ['Test Compliance']
