@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 gcp_project_id = input('gcp_project_id')
 gcp_gke_locations = input('gcp_gke_locations')
 gce_zones = input('gce_zones')

@@ -57,7 +57,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure Owners" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/owner') }
     it "matches the Owners allow list" do
-      expect(subject.members).to cmp(project_owners_list).or eq([])
+      expect(subject.members).to cmp(project_owners_list).or eq([]).or be_nil
     end
   end
 
