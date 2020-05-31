@@ -59,28 +59,52 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   end
 
   if keyrings
+    iam_cache = IAMBindingsCache(project: gcp_project_id)
+    kms_admin_bindings = iam_cache.iam_bindings['roles/cloudkms.admin']
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Admins" do
-      subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.admin') }
-      it "matches the KMS admins allow list" do
-        expect(subject.members).to cmp(kms_admins_list).or eq(nil).or cmp([])
+      subject { kms_admin_bindings }
+      if kms_admin_bindings.nil? || kms_admin_bindings.members.empty?
+        skip 'There are no Cloud KMS Admins in the project'
+      else
+        it "matches the KMS admins allow list" do
+          expect(subject.members).to cmp(kms_admins_list)
+        end
       end
     end
+
+    kms_encrypters_bindings = iam_cache.iam_bindings['roles/cloudkms.cryptoKeyEncrypter']
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter are on a white list" do
-      subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.encrypter') }
-      it "matches the KMS Encrypters allow list" do
-        expect(subject.members).to cmp(kms_encrypters_list).or eq(nil).or cmp([])
+      subject { kms_encrypters_bindings }
+      if kms_encrypters_bindings.nil? || kms_encrypters_bindings.members.empty?
+        skip 'There are no Cloud KMS Encrypters in the project'
+      else
+        it "matches the KMS Encrypters allow list" do
+          expect(subject.members).to cmp(kms_encrypters_list)
+        end
       end
     end
+
+    kms_decrypters_bindings = iam_cache.iam_bindings['roles/cloudkms.cryptoKeyDecrypter']
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Decrypter are on a white list" do
-      subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.decrypter') }
-      it "matches the KMS Decrypters allow list" do
-        expect(subject.members).to cmp(kms_decrypters_list).or eq(nil).or cmp([])
+      subject { kms_decrypters_bindings }
+      if kms_decrypters_bindings.nil? || kms_decrypters_bindings.members.empty?
+        skip 'There are no Cloud KMS Decrypters in the project'
+      else
+        it "matches the KMS Decrypters allow list" do
+          expect(subject.members).to cmp(kms_decrypters_list)
+        end
       end
     end
+
+    kms_enc_dec_bindings = iam_cache.iam_bindings['roles/cloudkms.cryptoKeyEncrypterDecrypter']
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter/Decrypter are on a white list" do
-      subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudkms.encrypterdecrypter') }
-      it "matches the KMS EncrypterDecrypters allow list" do
-        expect(subject.members).to cmp(kms_encrypterdecrypters_list).or eq(nil).or cmp([])
+      subject { kms_enc_dec_bindings }
+      if kms_enc_dec_bindings.nil? || kms_enc_dec_bindings.members.empty?
+        skip 'There are no Cloud KMS Encrypter/Decrypters in the project'
+      else
+        it "matches the KMS Encrypter/Decrypters allow list" do
+          expect(subject.members).to cmp(kms_encrypterdecrypters_list)
+        end
       end
     end
   end

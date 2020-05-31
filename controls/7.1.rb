@@ -44,9 +44,10 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Ensure IAM Role bindings are to groups and not users directly
-  google_project_iam_bindings(project: gcp_project_id).iam_binding_roles.each do |role|
+  iam_cache = IAMBindingsCache(project: gcp_project_id)
+  iam_cache.iam_bindings.keys.each do |role|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] IAM Role #{role}" do
-      subject { google_project_iam_binding(project: gcp_project_id, role: role) }
+      subject { iam_cache.iam_bindings[role] }
       it "should not have any \"user:<users>@\" bound" do
         subject.members.to_s.should_not match(/user:/)
       end
@@ -54,10 +55,14 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   end
 
   # Ensure the list of owners is known
-  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure Owners" do
-    subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/owner') }
-    it "matches the Owners allow list" do
-      expect(subject.members).to cmp(project_owners_list).or eq([]).or be_nil
+  describe "[[#{gcp_project_id}] Ensure Owners" do
+    subject { iam_cache.iam_bindings['roles/owner'] }
+    if iam_cache.iam_bindings['roles/owner'].nil? || iam_cache.iam_bindings['roles/owner'].members.empty?
+      skip 'There are no Owners in the project'
+    else
+      it "matches the Owners allow list" do
+        expect(subject.members).to cmp(project_owners_list)
+      end
     end
   end
 
@@ -85,7 +90,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   google_project_iam_bindings(project: gcp_project_id).where { iam_binding_role == 'roles/editor' || iam_binding_role == 'roles/owner' || iam_binding_role == 'roles/viewer' }.iam_binding_roles.each do |role|
     attached_service_accounts.each do |sa_name|
       describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] ServiceAccount #{sa_name}" do
-        subject { google_project_iam_binding(project: gcp_project_id, role: role) }
+        subject { iam_cache.iam_bindings[role] }
         it "should not be bound to #{role}" do
           subject.members.should_not include "serviceAccount:#{sa_name}"
         end
