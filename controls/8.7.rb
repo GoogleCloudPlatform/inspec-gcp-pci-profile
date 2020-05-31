@@ -45,43 +45,70 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
+  iam_cache = IAMBindingsCache(project: gcp_project_id)
+
   # Ensure whitelisted memorystore user accounts only
+  redis_admin_bindings = iam_cache.iam_bindings['roles/redis.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure MemoryStore Admins" do
-    subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/redis.admin') }
-    it "matches the MemoryStore Admins allow list" do
-      expect(subject.members).to cmp(memorystore_admins_list).or eq(nil).or cmp([])
+    subject { redis_admin_bindings }
+    if redis_admin_bindings.nil? || redis_admin_bindings.members.empty?
+      skip 'There are no MemoryStore Admins in the project'
+    else
+      it "matches the MemoryStore Admins allow list" do
+        expect(subject.members).to cmp(memorystore_admins_list)
+      end
     end
   end
 
   # Ensure whitelisted cloudsql admin accounts only
+  cloud_sql_admin_bindings = iam_cache.iam_bindings['roles/cloudsql.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure CloudSQL Admins" do
-    subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudsql.admin') }
-    it "matches the CloudSQL Admins allow list" do
-      expect(subject.members).to cmp(cloudsql_admins_list).or eq(nil).or cmp([])
+    subject { cloud_sql_admin_bindings }
+    if cloud_sql_admin_bindings.nil? || cloud_sql_admin_bindings.members.empty?
+      skip 'There are no Cloud SQL Admins in the project'
+    else
+      it "matches the Cloud SQL Admins allow list" do
+        expect(subject.members).to cmp(cloudsql_admins_list)
+      end
     end
   end
 
   # Ensure whitelisted cloudsql client accounts only
+  cloud_sql_client_bindings = iam_cache.iam_bindings['roles/cloudsql.client']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure CloudSQL Clients" do
-    subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/cloudsql.client') }
-    it "matches the CloudSQL client allow list" do
-      expect(subject.members).to cmp(cloudsql_clients_list).or eq(nil).or cmp([])
+    subject { cloud_sql_client_bindings }
+    if cloud_sql_client_bindings.nil? || cloud_sql_client_bindings.members.empty?
+      skip 'There are no Cloud SQL Clients in the project'
+    else
+      it "matches the CloudSQL client allow list" do
+        expect(subject.members).to cmp(cloudsql_clients_list)
+      end
     end
   end
 
   # Ensure whitelisted BigQuery admin accounts only
+  bq_admin_bindings = iam_cache.iam_bindings['roles/bigquery.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure BigQuery Admins" do
-    subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/bigquery.admin') }
-    it "matches the BigQuery Admins allow list" do
-      expect(subject.members).to cmp(bq_admins_list).or eq(nil).or cmp([])
+    subject { bq_admin_bindings }
+    if bq_admin_bindings.nil? || bq_admin_bindings.members.empty?
+      skip 'There are no BigQuery Admins in the project'
+    else
+      it "matches the BigQuery Admins allow list" do
+        expect(subject.members).to cmp(bq_admins_list)
+      end
     end
   end
 
   # Ensure whitelisted Cloud Spanner admin accounts only
+  spanner_admin_bindings = iam_cache.iam_bindings['roles/spanner.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure Cloud Spanner Admins" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/spanner.admin') }
-    it "matches the Cloud Spanner Admins allow list" do
-      expect(subject.members).to cmp(spanner_admins_list).or eq(nil).or cmp([])
+    if spanner_admin_bindings.nil? || spanner_admin_bindings.members.empty?
+      skip 'There are no Cloud Spanner Admins in the project'
+    else
+      it "matches the Cloud Spanner Admins allow list" do
+        expect(subject.members).to cmp(spanner_admins_list)
+      end
     end
   end
 end

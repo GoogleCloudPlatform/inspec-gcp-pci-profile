@@ -71,9 +71,11 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   end
 
   # Ensure the Default SA is not attached to Editor
-  google_project_iam_bindings(project: gcp_project_id).where(iam_binding_role: 'roles/editor').iam_binding_roles.each do |role|
+  iam_cache = IAMBindingsCache(project: gcp_project_id)
+  iam_editor_bindings = iam_cache.iam_bindings['roles/editor']
+  unless iam_editor_bindings.nil?
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] The IAM Role 'roles/editor'" do
-      subject { google_project_iam_binding(project: gcp_project_id, role: role) }
+      subject { iam_editor_bindings }
       it "should not be bound to the default compute service account" do
         subject.members.should_not include(/-compute@developer.gserviceaccount.com/)
       end
