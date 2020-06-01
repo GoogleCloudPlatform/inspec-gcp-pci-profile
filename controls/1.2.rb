@@ -44,8 +44,9 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   if google_compute_networks(project: gcp_project_id).count.zero?
     describe "[#{gcp_project_id}]" do
-    it "does not have have any VPCs" do
-      skip
+      it 'does not have have any VPCs' do
+        skip
+      end
     end
   else
     # Explicit egress deny all rule in place
