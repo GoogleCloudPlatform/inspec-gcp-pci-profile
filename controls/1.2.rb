@@ -42,70 +42,77 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
-  # Explicit egress deny all rule in place
-  egress_deny_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    egress_deny_all_fw_rules << firewall_name if fw.respond_to?('denied') && !fw.denied.nil? && fw.denied[0].ip_protocol == "all"
-  end
-  describe "[#{gcp_project_id}]" do
-    it "has a deny all egress rule" do
-      expect(egress_deny_all_fw_rules.count).to be >= 1
+  if google_compute_networks(project: gcp_project_id).count.zero?
+    describe "[#{gcp_project_id}]" do
+    it "does not have have any VPCs" do
+      skip
     end
-  end
+  else
+    # Explicit egress deny all rule in place
+    egress_deny_all_fw_rules = []
+    google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+      fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
+      egress_deny_all_fw_rules << firewall_name if fw.respond_to?('denied') && !fw.denied.nil? && fw.denied[0].ip_protocol == "all"
+    end
+    describe "[#{gcp_project_id}]" do
+      it "has a deny all egress rule" do
+        expect(egress_deny_all_fw_rules.count).to be >= 1
+      end
+    end
 
-  # At least one egress rule in place
-  egress_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    egress_fw_rules << firewall_name
-  end
-  describe "[#{gcp_project_id}]" do
-    it "has at least one egress rule" do
-      expect(egress_fw_rules.count).to be >= 1
+    # At least one egress rule in place
+    egress_fw_rules = []
+    google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+      egress_fw_rules << firewall_name
     end
-  end
+    describe "[#{gcp_project_id}]" do
+      it "has at least one egress rule" do
+        expect(egress_fw_rules.count).to be >= 1
+      end
+    end
 
-  # Does not have an allow-all egress rule
-  egress_allow_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    egress_allow_all_fw_rules << firewall_name if fw.respond_to?('allowed') \
-      && !fw.allowed.nil? \
-      && fw.allowed[0].ip_protocol == "all"
-  end
-  describe "[#{gcp_project_id}]" do
-    it "does not have an allow all egress rule" do
-      expect(egress_allow_all_fw_rules.count).to eq(0)
+    # Does not have an allow-all egress rule
+    egress_allow_all_fw_rules = []
+    google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+      fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
+      egress_allow_all_fw_rules << firewall_name if fw.respond_to?('allowed') \
+        && !fw.allowed.nil? \
+        && fw.allowed[0].ip_protocol == "all"
     end
-  end
+    describe "[#{gcp_project_id}]" do
+      it "does not have an allow all egress rule" do
+        expect(egress_allow_all_fw_rules.count).to eq(0)
+      end
+    end
 
-  # Specific egress TCP ports allowed to 0.0.0.0/0
-  egress_allow_tcp_to_any_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    next unless fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
-    fw.allowed.each do |allow_item|
-      egress_allow_tcp_to_any_fw_rules += allow_item.ports if allow_item.ip_protocol == "tcp"
+    # Specific egress TCP ports allowed to 0.0.0.0/0
+    egress_allow_tcp_to_any_fw_rules = []
+    google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+      fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
+      next unless fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
+      fw.allowed.each do |allow_item|
+        egress_allow_tcp_to_any_fw_rules += allow_item.ports if allow_item.ip_protocol == "tcp"
+      end
     end
-  end
-  describe "[#{gcp_project_id}]" do
-    it "should allow specific TCP ports outbound to 0.0.0.0/0" do
-      expect(egress_allow_tcp_to_any_fw_rules).to eq(allow_all_tcp_ports)
+    describe "[#{gcp_project_id}]" do
+      it "should allow specific TCP ports outbound to 0.0.0.0/0" do
+        expect(egress_allow_tcp_to_any_fw_rules).to eq(allow_all_tcp_ports)
+      end
     end
-  end
 
-  # Specific egress UDP ports allowed to 0.0.0.0/0
-  egress_allow_udp_to_any_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    next unless fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
-    fw.allowed.each do |allow_item|
-      egress_allow_udp_to_any_fw_rules += allow_item.ports if allow_item.ip_protocol == "udp"
+    # Specific egress UDP ports allowed to 0.0.0.0/0
+    egress_allow_udp_to_any_fw_rules = []
+    google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+      fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
+      next unless fw.respond_to?('allowed') && !fw.allowed.nil? && fw.destination_ranges == ["0.0.0.0/0"]
+      fw.allowed.each do |allow_item|
+        egress_allow_udp_to_any_fw_rules += allow_item.ports if allow_item.ip_protocol == "udp"
+      end
     end
-  end
-  describe "[#{gcp_project_id}]" do
-    it "should allow specific UDP ports outbound to 0.0.0.0/0" do
-      expect(egress_allow_udp_to_any_fw_rules).to eq(allow_all_udp_ports)
+    describe "[#{gcp_project_id}]" do
+      it "should allow specific UDP ports outbound to 0.0.0.0/0" do
+        expect(egress_allow_udp_to_any_fw_rules).to eq(allow_all_udp_ports)
+      end
     end
   end
 end
