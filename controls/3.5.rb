@@ -50,6 +50,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   locations << 'global'
 
   kms_cache = KMSKeyCache(project: gcp_project_id, locations: locations)
+
   keyrings = false
   locations.each do |location|
     if kms_cache.kms_key_ring_names[location].count.positive?
@@ -136,6 +137,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   locations = google_compute_regions(project: gcp_project_id).region_names
   locations << 'global'
 
+  kms_cache = KMSKeyCache(project: gcp_project_id, locations: locations)
   # Ensure all KMS Keys in each Keyring are HSM-backed.
   locations.each do |location|
     kms_cache.kms_key_ring_names[location].each do |keyring|
@@ -175,6 +177,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   locations = google_compute_regions(project: gcp_project_id).region_names
   locations << 'global'
 
+  kms_cache = KMSKeyCache(project: gcp_project_id, locations: locations)
   # Ensure all KMS Keys are in the fewest locations possible
   keyring_locations = []
   locations.each do |location|
