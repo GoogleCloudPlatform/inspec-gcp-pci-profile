@@ -20,7 +20,7 @@ copyright: Google
 copyright_email: copyright@google.com
 license: Apache-2.0
 summary: "Inspec Google Cloud Platform PCI-DSS v3.2.1 Profile"
-version: "3.2.1-4"
+version: "3.2.1-5"
 supports:
   - platform: gcp
 depends:
