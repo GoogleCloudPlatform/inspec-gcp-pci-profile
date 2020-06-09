@@ -47,21 +47,27 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   locations = google_compute_regions(project: gcp_project_id).region_names
   locations << 'global'
 
+  kms_cache = KMSKeyCache(project: gcp_project_id, locations: locations)
   # Ensure KMS keys autorotate 90d or less
   locations.each do |location|
-    google_kms_key_rings(project: gcp_project_id, location: location).key_ring_names.each do |keyring|
-      sleep 6
-      google_kms_crypto_keys(project: gcp_project_id, location: location, key_ring_name: keyring).crypto_key_names.each do |keyname|
-        sleep 6
+    kms_cache.kms_key_ring_names[location].each do |keyring|
+      kms_cache.kms_crypto_keys[location][keyring].each do |keyname|
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
-        rotation_period_int = key.rotation_period.delete_suffix('s').to_i
         next unless key.primary_state == "ENABLED"
-        describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
-          subject { key }
-          it "should have a lower or equal rotation period than #{kms_rotation_period_seconds}" do
-            expect(rotation_period_int).to be <= kms_rotation_period_seconds
+        if key.rotation_period.nil?
+          describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
+            subject { key }
+            its('rotation_period') { should_not be_nil }
           end
-          its('next_rotation_time') { should be <= (Time.now + kms_rotation_period_seconds) }
+        else
+          rotation_period_int = key.rotation_period.delete_suffix('s').to_i
+          describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
+            subject { key }
+            it "should have a lower or equal rotation period than #{kms_rotation_period_seconds}" do
+              expect(rotation_period_int).to be <= kms_rotation_period_seconds
+            end
+            its('next_rotation_time') { should be <= (Time.now + kms_rotation_period_seconds) }
+          end
         end
       end
     end
