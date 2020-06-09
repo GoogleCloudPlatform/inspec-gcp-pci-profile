@@ -53,6 +53,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     kms_cache.kms_key_ring_names[location].each do |keyring|
       kms_cache.kms_crypto_keys[location][keyring].each do |keyname|
         key = google_kms_crypto_key(project: gcp_project_id, location: location, key_ring_name: keyring, name: keyname)
+        next unless key.primary_state == "ENABLED"
         if key.rotation_period.nil?
           describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
             subject { key }
@@ -60,7 +61,6 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
           end
         else
           rotation_period_int = key.rotation_period.delete_suffix('s').to_i
-          next unless key.primary_state == "ENABLED"
           describe "[#{gcp_project_id}] #{key.crypto_key_name}" do
             subject { key }
             it "should have a lower or equal rotation period than #{kms_rotation_period_seconds}" do
