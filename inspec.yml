@@ -20,12 +20,12 @@ copyright: Google
 copyright_email: copyright@google.com
 license: Apache-2.0
 summary: "Inspec Google Cloud Platform PCI-DSS v3.2.1 Profile"
-version: "3.2.1-6"
+version: "3.2.1-7"
 supports:
   - platform: gcp
 depends:
   - name: inspec-gcp-helpers
-    url: https://github.com/GoogleCloudPlatform/inspec-gcp-helpers/archive/v1.0.6.tar.gz
+    url: https://github.com/GoogleCloudPlatform/inspec-gcp-helpers/archive/v1.0.7.tar.gz
 inputs:
 - name: gcp_project_id
   description: 'The GCP project identifier.'
