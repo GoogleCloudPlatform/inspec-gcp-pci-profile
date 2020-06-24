@@ -98,18 +98,25 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
-  # Explicit egress deny all rule in place
-  egress_deny_all_fw_rules = []
-  google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
-    fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
-    egress_deny_all_fw_rules << firewall_name if !fw.disabled \
-      && fw.respond_to?('denied') \
-      && !fw.denied.nil? \
-      && fw.denied[0].ip_protocol == "all"
-  end
-  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}]" do
-    it "has a deny all egress rule" do
-      expect(egress_deny_all_fw_rules.count).to be >= 1
+  if google_compute_networks(project: gcp_project_id).count.zero?
+    impact 'none'
+    describe "[#{gcp_project_id}] The project does not have VPCs. This test is not applicable." do
+      skip "[#{gcp_project_id}] The project does not have VPCs. This test is not applicable."
+    end
+  else
+    # Explicit egress deny all rule in place
+    egress_deny_all_fw_rules = []
+    google_compute_firewalls(project: gcp_project_id).where(firewall_direction: 'EGRESS').where { firewall_name !~ /^gke/ }.firewall_names.each do |firewall_name|
+      fw = google_compute_firewall(project: gcp_project_id, name: firewall_name)
+      egress_deny_all_fw_rules << firewall_name if !fw.disabled \
+        && fw.respond_to?('denied') \
+        && !fw.denied.nil? \
+        && fw.denied[0].ip_protocol == "all"
+    end
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}]" do
+      it "has a deny all egress rule" do
+        expect(egress_deny_all_fw_rules.count).to be >= 1
+      end
     end
   end
 
