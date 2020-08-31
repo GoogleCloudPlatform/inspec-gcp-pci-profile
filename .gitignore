@@ -1,2 +1,4 @@
 inspec.lock
 *.swp
+Gemfile.lock
+inputs.yml
