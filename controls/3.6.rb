@@ -43,9 +43,9 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
-  # Get all "normal" regions and add "global"
+  # Get all "normal" regions and add "global" and multi-regional locations
   locations = google_compute_regions(project: gcp_project_id).region_names
-  locations << 'global'
+  locations << 'global' << 'asia' << 'europe' << 'us' << 'eur4' << 'nam4'
 
   kms_cache = KMSKeyCache(project: gcp_project_id, locations: locations)
   # Ensure KMS keys autorotate 90d or less
