@@ -34,7 +34,7 @@ Further details can be found here: <https://docs.chef.io/inspec/inputs/>
 ### CLI Example
 
 ```
-$ cat attrs.yml
+$ cat inputs.yml
 gcp_project_id: "my-project-id"
 fw_change_control_id_regex: 'CID:'
 fw_override_control_id_regex: 'AID:'
