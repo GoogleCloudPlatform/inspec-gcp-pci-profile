@@ -60,5 +60,5 @@ Example run:
 
 ```
 # scan a project with this profile, replace <YOUR_PROJECT_ID> with your project ID
-$ CHEF_LICENSE=accept-no-persist inspec exec https://github.com/GoogleCloudPlatform/inspec-gcp-pci-profile -t gcp:// --input gcp_project_id=<YOUR_PROJECT_ID> --reporter cli json:myscan.json
+$ CHEF_LICENSE=accept-no-persist inspec exec https://github.com/GoogleCloudPlatform/inspec-gcp-pci-profile -t gcp:// --input-file inputs.yml --reporter cli json:myscan.json
 ```

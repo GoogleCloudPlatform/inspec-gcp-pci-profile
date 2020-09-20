@@ -48,7 +48,7 @@ Hit Next after you successfully selected your project.
 To scan your project against the CIS GKE Benchmark with InSpec, run:
 
 ```bash
-CHEF_LICENSE=accept-no-persist inspec exec https://github.com/GoogleCloudPlatform/inspec-gcp-pci-profile.git -t gcp:// --input gcp_project_id={{project-id}}
+CHEF_LICENSE=accept-no-persist inspec exec https://github.com/GoogleCloudPlatform/inspec-gcp-pci-profile.git -t gcp:// --input-file inputs.yml
 ```
 
 This should take about two minutes to complete.
