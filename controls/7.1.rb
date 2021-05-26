@@ -45,7 +45,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   # Ensure IAM Role bindings are to groups and not users directly
   iam_cache = IAMBindingsCache(project: gcp_project_id)
-  iam_cache.iam_bindings.keys.each do |role|
+  iam_cache.iam_bindings.each_key do |role|
     describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] IAM Role #{role}" do
       subject { iam_cache.iam_bindings[role] }
       it "should not have any \"user:<users>@\" bound" do
