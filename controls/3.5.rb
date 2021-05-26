@@ -74,7 +74,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
 
     kms_encrypters_bindings = iam_cache.iam_bindings['roles/cloudkms.cryptoKeyEncrypter']
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter are on a white list" do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter are on a allowlist" do
       subject { kms_encrypters_bindings }
       if kms_encrypters_bindings.nil? || kms_encrypters_bindings.members.empty?
         skip 'There are no Cloud KMS Encrypters in the project'
@@ -86,7 +86,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
 
     kms_decrypters_bindings = iam_cache.iam_bindings['roles/cloudkms.cryptoKeyDecrypter']
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Decrypter are on a white list" do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Decrypter are on a allowlist" do
       subject { kms_decrypters_bindings }
       if kms_decrypters_bindings.nil? || kms_decrypters_bindings.members.empty?
         skip 'There are no Cloud KMS Decrypters in the project'
@@ -98,7 +98,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
 
     kms_enc_dec_bindings = iam_cache.iam_bindings['roles/cloudkms.cryptoKeyEncrypterDecrypter']
-    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter/Decrypter are on a white list" do
+    describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure KMS Encrypter/Decrypter are on a allowlist" do
       subject { kms_enc_dec_bindings }
       if kms_enc_dec_bindings.nil? || kms_enc_dec_bindings.members.empty?
         skip 'There are no Cloud KMS Encrypter/Decrypters in the project'

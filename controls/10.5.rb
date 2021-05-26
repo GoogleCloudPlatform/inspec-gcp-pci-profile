@@ -48,7 +48,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Ensure only a desired list of accounts have logging.viewer
-  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a whitelist of users/SAs/groups have access to logging viewer" do
+  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a allowlist of users/SAs/groups have access to logging viewer" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/logging.viewer') }
     it "matches the Logging Viewer allow list" do
       expect(subject.members).to cmp(logging_viewer_list).or eq(nil).or cmp([])
@@ -79,7 +79,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
   ref "PCI DSS #{pci_version}", url: "#{pci_url}"
 
   # Ensure only a desired list of accounts have logging.admin
-  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a whitelist of users/SAs/groups have access to logging Admin" do
+  describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure a allowlist of users/SAs/groups have access to logging Admin" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/logging.admin') }
     it "matches the Logging Admin allow list" do
       expect(subject.members).to cmp(logging_admin_list).or eq(nil).or cmp([])
