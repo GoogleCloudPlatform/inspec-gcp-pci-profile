@@ -47,7 +47,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
 
   iam_cache = IAMBindingsCache(project: gcp_project_id)
 
-  # Ensure whitelisted memorystore user accounts only
+  # Ensure allowlisted memorystore user accounts only
   redis_admin_bindings = iam_cache.iam_bindings['roles/redis.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure MemoryStore Admins" do
     subject { redis_admin_bindings }
@@ -60,7 +60,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
   end
 
-  # Ensure whitelisted cloudsql admin accounts only
+  # Ensure allowlisted cloudsql admin accounts only
   cloud_sql_admin_bindings = iam_cache.iam_bindings['roles/cloudsql.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure CloudSQL Admins" do
     subject { cloud_sql_admin_bindings }
@@ -73,7 +73,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
   end
 
-  # Ensure whitelisted cloudsql client accounts only
+  # Ensure allowlisted cloudsql client accounts only
   cloud_sql_client_bindings = iam_cache.iam_bindings['roles/cloudsql.client']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure CloudSQL Clients" do
     subject { cloud_sql_client_bindings }
@@ -86,7 +86,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
   end
 
-  # Ensure whitelisted BigQuery admin accounts only
+  # Ensure allowlisted BigQuery admin accounts only
   bq_admin_bindings = iam_cache.iam_bindings['roles/bigquery.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure BigQuery Admins" do
     subject { bq_admin_bindings }
@@ -99,7 +99,7 @@ control "pci-dss-#{pci_version}-#{pci_req}" do
     end
   end
 
-  # Ensure whitelisted Cloud Spanner admin accounts only
+  # Ensure allowlisted Cloud Spanner admin accounts only
   spanner_admin_bindings = iam_cache.iam_bindings['roles/spanner.admin']
   describe "[#{pci_version}][#{pci_req}][#{gcp_project_id}] Ensure Cloud Spanner Admins" do
     subject { google_project_iam_binding(project: gcp_project_id, role: 'roles/spanner.admin') }
